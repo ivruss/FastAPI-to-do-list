@@ -1,29 +1,15 @@
 import jwt
 import datetime
-from dataclasses import dataclass
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from users_database_control import get_data, post_data, delete_data, update_data, if_user_id_in_database, log_in
-from tasks_database_control import post_task, get_task, delete_task, update_task, if_task_id_in_database, if_task_belongs_to
-
-@dataclass()
-class User(BaseModel):
-    first_name:str
-    email:str
-    password:str
-    token:str
-
-class Task(BaseModel):
-    header:str
-    data:str
-    user_id:int
+from database.users_table_control import get_user, post_user, delete_user, update_user, if_user_id_in_database, log_in
+from database.tasks_table_control import post_task, get_task, delete_task, update_task, if_task_id_in_database, if_task_belongs_to
 
 app = FastAPI()
 
 
 @app.get("/get")
 def get_all_users():
-    data = get_data()
+    data = get_user()
     return data
 
 
@@ -32,13 +18,13 @@ def query_user_by_id(user_id:int):
     if not if_user_id_in_database(user_id):
         raise HTTPException(status_code=404, detail="Item not found")
 
-    data = get_data(user_id)
+    data = get_user(user_id)
     return data
     
     
 @app.delete('/delete/{user_id}')
 def delete_user(user_id:int):
-    delete_data(user_id)
+    delete_user(user_id)
     return 200
     
         
@@ -47,13 +33,13 @@ def patch_user(user_id:int, user_data: dict):
     if not if_user_id_in_database(user_id):
         raise HTTPException(status_code=404, detail="Item not found")
     
-    update_data(user_id, user_data)        
+    update_user(user_id, user_data)        
     return 200
 
 
 @app.post('/post')
-def add_user(user: User):
-    post_data(dict(user))
+def add_user(user: dict):
+    post_user(user)
     return 200
 
 
@@ -80,6 +66,7 @@ def add_task(user_id, data:dict):
     if not if_user_id_in_database(user_id):
         raise HTTPException(status_code=404, detail="Item not found")
     
+    data['user_id'] = user_id
     post_task(data)
     return 200
 

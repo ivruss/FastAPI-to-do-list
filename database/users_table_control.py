@@ -1,77 +1,8 @@
 import psycopg2
 from passlib.hash import bcrypt_sha256
-
-
-def names_data_generator():
-    names = ['Glenn', 'Dave', 'Duke', 'Alex', 'Lindy', 'Bart', 'Lisa']
-
-    for name in names:
-
-        data = {'first_name': name, 'email': f'{name}@gmail.com', 'password': f'{name}123', 'token': f'{name}token'}
-
-
-
-def database_creation(db_name):
-    try:
-        conn = psycopg2.connect(
-        user='postgres',
-        password='12042013',
-        host='localhost',
-        port='5432'
-        )
-        
-        conn.autocommit = True
-        
-        cursor = conn.cursor()
-        
-        create_db_query = f'CREATE DATABASE {db_name};'
-        cursor.execute(create_db_query)
-        
-        print(f"Database '{db_name}' created successfully")
-        
-    except psycopg2.Error as e:
-        print("Error:", e)
-        
-    finally:
-        cursor.close()
-        conn.close()
-
-
-def table_creation(table_name):
-    try:
-        conn = psycopg2.connect(
-        database='fastapi_users_test',
-        user='postgres',
-        password='12042013',
-        host='localhost',
-        port='5432'
-        )
-        
-        conn.autocommit = True
-        
-        cursor = conn.cursor()
-        
-        create_table_query = f'''
-        CREATE TABLE {table_name} (
-            id SERIAL PRIMARY KEY,
-            first_name VARCHAR(255),
-            email VARCHAR(255),
-            password VARCHAR(255),
-            token TEXT
-        );
-        '''
-        cursor.execute(create_table_query)
-        print (f"Table '{table_name}' created successfully")
-        
-    except psycopg2.Error as e:
-        print("Error:", e)
-        
-    finally:
-        cursor.close()
-        conn.close()
       
         
-def post_data(data):
+def post_user(data):
     try:
         conn = psycopg2.connect(
         database='fastapi_users_test',
@@ -86,8 +17,8 @@ def post_data(data):
         cursor = conn.cursor()
         
         insert_query = """
-        INSERT INTO users (first_name, email, password, token)
-        VALUES (%s, %s, %s, %s);
+        INSERT INTO users (first_name, email, password)
+        VALUES (%s, %s, %s);
         """
         
         password = bcrypt_sha256.hash(data['password'])
@@ -95,8 +26,7 @@ def post_data(data):
         data_to_insert = (
             data['first_name'],
             data['email'],
-            password,
-            data['token']
+            password
         )
         
         cursor.execute(insert_query, data_to_insert)
@@ -110,7 +40,7 @@ def post_data(data):
         conn.close()
 
 
-def get_data(user_id=None):
+def get_user(user_id=None):
     try:
         conn = psycopg2.connect(
             database='fastapi_users_test',
@@ -134,7 +64,7 @@ def get_data(user_id=None):
             
             rows = cursor.fetchall()
             for row in rows:
-                result.append({'id': row[0], 'first_name': row[1], 'email': row[2], 'password': row[3], 'token': row[4]})
+                result.append({'id': row[0], 'first_name': row[1], 'email': row[2], 'password': row[3]})
                 
         
         if user_id:
@@ -144,7 +74,7 @@ def get_data(user_id=None):
             rows = cursor.fetchall()
             
             for row in rows:
-                result = {'id': row[0], 'first_name': row[1], 'email': row[2], 'password': row[3], 'token': row[4]}
+                result = {'id': row[0], 'first_name': row[1], 'email': row[2], 'password': row[3]}
 
         return result
             
@@ -156,7 +86,7 @@ def get_data(user_id=None):
         conn.close()
 
 
-def delete_data(user_id):
+def delete_user(user_id):
     try:
         conn = psycopg2.connect(
         database='fastapi_users_test',
@@ -184,7 +114,7 @@ def delete_data(user_id):
         conn.close()
 
 
-def update_data(user_id, data):
+def update_user(user_id, data):
     try:
         conn = psycopg2.connect(
         database='fastapi_users_test',
@@ -282,7 +212,5 @@ def if_user_id_in_database(user_id):
     finally:
         cursor.close()
         conn.close()
-        
-        
-        
+    
 
