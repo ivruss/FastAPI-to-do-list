@@ -90,33 +90,4 @@ def tasks_table_creation(table_name='tasks'):
     finally:
         cursor.close()
         conn.close()
-        
-def table_redaction():
-    try:
-        conn = psycopg2.connect(
-        database='fastapi_users_test',
-        user='postgres',
-        password='12042013',
-        host='localhost',
-        port='5432'
-        )
-        
-        conn.autocommit = True
-        
-        cursor = conn.cursor()
-        
-        add_column_query = """
-        ALTER TABLE users
-        DROP COLUMN token;
-        """
-
-        cursor.execute(add_column_query)
-        print ("Successful")
-        
-    except psycopg2.Error as e:
-        print("Error:", e)
-        
-    finally:
-        cursor.close()
-        conn.close()
-        
+    
